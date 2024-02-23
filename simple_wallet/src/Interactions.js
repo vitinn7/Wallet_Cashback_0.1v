@@ -1,48 +1,55 @@
-import {React, useState, useEffect} from 'react'
-import styles from './Wallet.module.css'
-
-
-
-
+import { React, useState } from 'react';
+import styles from './Wallet.module.css';
 
 const Interactions = (props) => {
-    const [transferHash,setTransferHash]= useState(null);
-    const [contract,setContract]= useState(null);
+  const [transferHash, setTransferHash] = useState(null);
+  const [isTransferring, setIsTransferring] = useState(false);
 
-    const transferHandler= async (e) => {
+  const transferHandler = async (e) => {
+    e.preventDefault();
 
-        console.log(props.contract);
-
-        e.preventDefault();
-        let transferAmount = e.target.sendAmount.value;
-        let recieverAddress = e.target.recieverAddress.value;
-
-        
-        let txt = await props.contract.transfer(recieverAddress,transferAmount);
-        console.log(txt);
-        setTransferHash(txt.hash);
+    if (isTransferring) {
+      // Se já estiver em processo de transferência, não faça nada
+      return;
     }
 
-    return(
-        <div className={styles.interactionsCard}>
-            <form onSubmit={transferHandler}>
-                <h3> Transfer Coins </h3>
-                    <p> Reciever Address  </p>
-                    <input type= 'text' id='recieverAddress' className={styles.addressInput}/>
+    setIsTransferring(true);
 
-                    <p>Send Amount</p>
-                    <input type='number' id='sendAmount' min='0'/>
+    try {
+      let transferAmount = e.target.sendAmount.value;
+      let recieverAddress = e.target.recieverAddress.value;
 
-                    <button type='submit' className={styles.button6}> Send </button>
-                    <div>
-                        {transferHash}
-                    </div>
-            </form>
+      console.log(props.contract);
 
-        </div>
-    );
+      let txt = await props.contract.transfer(recieverAddress, transferAmount);
+      console.log(txt);
+      setTransferHash(txt.hash);
+    } catch (error) {
+      console.error(error);
+      // Lide com o erro, se necessário
+    } finally {
+      // Independentemente de ter sido bem-sucedido ou não, redefina o estado de transferência
+      setIsTransferring(false);
+    }
+  };
 
+  return (
+    <div className={styles.interactionsCard}>
+      <form onSubmit={transferHandler}>
+        <h3> Transfer Coins </h3>
+        <p> Reciever Address </p>
+        <input type='text' id='recieverAddress' className={styles.addressInput} />
 
-}
+        <p>Send Amount</p>
+        <input type='number' id='sendAmount' min='0' />
+
+        <button type='submit' className={styles.button6} disabled={isTransferring}>
+          {isTransferring ? 'Transferência em andamento...' : 'Send'}
+        </button>
+        <div>{transferHash}</div>
+      </form>
+    </div>
+  );
+};
 
 export default Interactions;

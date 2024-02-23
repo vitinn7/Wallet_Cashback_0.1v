@@ -7,7 +7,7 @@ import Interactions from './Interactions';
 
 const Wallet = () => {
 
-    const contractAddress ="0x7747F78AD8aa1F28E43C10802E664100d750Dd3f";
+    const contractAddress ="0xFb25F42542f692C8C8edC6D4B4c67757fCf6381C";
 
     const [tokenName,setTokenName]= useState("Token");
     const [connButtonText,setConnButtonText] = useState("Connect Wallet");
@@ -19,6 +19,11 @@ const Wallet = () => {
     const [provider,setProvider] = useState(null);
     const [signer, setSigner] = useState(null);
     const [contract,setContract]= useState(null);
+
+    const [quantTransfer, setQuantTransfer]= useState(null);
+    const [cashbackBalance, setCashbackBalance] = useState(null);
+
+    const [totalSupply, setTotalSupply] = useState(null);
 
 
 
@@ -90,6 +95,9 @@ const Wallet = () => {
         if (contract) {
           updateBalance();
           updateTokenName();
+          updatequantTransfer();
+          updateCashbackAcumulado();
+          updateTotalSupply();
         }
     }, [contract]);
     
@@ -101,6 +109,38 @@ const Wallet = () => {
           console.error('Erro ao atualizar o saldo:', error);
         }
     };
+
+    const updatequantTransfer = async () => {
+        try {
+            const number = await contract.getTransactionCount(defaultAccount);
+            setQuantTransfer(Number(number));
+
+        } catch (error){
+            console.error('Erro ao atualizar a quantidade de transferencias do token:', error);
+
+        }
+        
+    }
+
+    const updateCashbackAcumulado = async () => {
+        try{
+            const number = await contract.getCashbackBalance(defaultAccount);
+            setCashbackBalance(Number(number));
+
+        } catch (error){
+            console.error('Erro ao atualizar o cashback acumulado da conta:', error);
+        }
+    }
+
+    const updateTotalSupply = async () =>{
+        try{
+            const supply = await contract.totalSupply();
+            setTotalSupply(Number(supply));
+        }catch(error){
+            console.error('Erro ao atualizar a Quantidade de Tokens em circulacao:', error);
+
+        }
+    }
       
       
       
@@ -130,13 +170,29 @@ const Wallet = () => {
                 </div>
                 <div>
                     <h3>
-                        {tokenName} Balance: {balance}
+                        {tokenName} Balance da Conta: {balance}
+                    </h3>
+                </div>
+                <div>
+                    <h3>
+                        Quantidade de Transferencias: {quantTransfer}
+                    </h3>
+                </div>
+                <div>
+                    <h3>
+                        CashBack Acumulado: {cashbackBalance}
                     </h3>
                 </div>
                 {errorMessage}
             </div>
 
             <Interactions contract={contract}/>
+
+            <div>
+                <h3>
+                    TotalSupply : {totalSupply}
+                </h3>
+            </div>
             
         </div>
 
