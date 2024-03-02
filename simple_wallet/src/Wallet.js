@@ -3,11 +3,18 @@ import { ethers } from "ethers"
 import styles from './Wallet.module.css'
 import simple_token_abi from './Contracts/simple_token_abi.json'
 import Interactions from './Interactions';
+import { useNavigate } from 'react-router-dom';
 
+
+let contractInstance;
+let contractExport;
 
 const Wallet = () => {
 
-    const contractAddress ="0xFb25F42542f692C8C8edC6D4B4c67757fCf6381C";
+    const contractAddress ="0xa2E32929b22b63Bed6c500053039Ec3DE37798F0";
+    contractExport = contractAddress;
+
+
 
     const [tokenName,setTokenName]= useState("Token");
     const [connButtonText,setConnButtonText] = useState("Connect Wallet");
@@ -24,6 +31,8 @@ const Wallet = () => {
     const [cashbackBalance, setCashbackBalance] = useState(null);
 
     const [totalSupply, setTotalSupply] = useState(null);
+
+
 
 
 
@@ -50,6 +59,13 @@ const Wallet = () => {
         updateEthers();
         
     };
+
+    const navigate = useNavigate();
+
+    const goToContractPage = () =>{
+        navigate('/Contract')
+
+    }
     const updateEthers = async () => {
         if (window.ethereum) {
             try {
@@ -78,7 +94,9 @@ const Wallet = () => {
                     // Define os estados com os novos valores
                     setProvider(tempProvider);
                     setSigner(tempSigner);
+                    contractInstance=tempContract;
                     setContract(tempContract);
+                    
                 } else {
                     console.error('contractAddress e simple_token_abi devem ser definidos.');
                 }
@@ -154,14 +172,16 @@ const Wallet = () => {
     };
     return(
         <div>
-            <h2>
-                {tokenName + " ERC-20 Wallet"}
+            <div style={{ textAlign: 'center' }}>
+                <h2>
+                    {tokenName + " ERC-20 Wallet"}
 
-            </h2>
-            <button className={styles.button6} onClick={connectWalletHandler}>
-                {connButtonText}
+                </h2>
+                <button className={styles.button6} onClick={connectWalletHandler}>
+                    {connButtonText}
                 
-            </button>
+                </button>
+            </div>
             <div className = {styles.walletCard}>
                 <div>
                     <h3>
@@ -188,17 +208,37 @@ const Wallet = () => {
 
             <Interactions contract={contract}/>
 
-            <div>
+
+
+            <div style={{ textAlign: 'center' }}>
                 <h3>
                     TotalSupply : {totalSupply}
                 </h3>
             </div>
+
+            <div style={{ textAlign: 'center' }}>
+                <button type='button' className={styles.button6} onClick={goToContractPage}>
+                    
+                    Contrato
+
+                </button>
+            </div>
+
             
         </div>
 
         
     );
 
-}
+};
+
+export{contractInstance, contractExport};
+
+
+
+
+
+
+
 
 export default Wallet;

@@ -34,7 +34,7 @@ const Interactions = (props) => {
   };
 
   return (
-    <div className={styles.interactionsCard}>
+    <div className={styles.interactionsCard} style={{ textAlign: 'center' }}>
       <form onSubmit={transferHandler}>
         <h3> Transfer Coins </h3>
         <p> Reciever Address </p>
