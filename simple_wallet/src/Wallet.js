@@ -1,9 +1,10 @@
 import {React, useState, useEffect} from 'react'
 import { ethers } from "ethers"
 import styles from './Wallet.module.css'
-import simple_token_abi from './Contracts/simple_token_abi.json'
+import simple_token_abi from './Contracts/Hardhat/artifacts/contracts/Lock.sol/Simple_Token.json'
 import Interactions from './Interactions';
 import { useNavigate } from 'react-router-dom';
+import HomePage, {contractHomePage} from './HomePage'
 
 
 let contractInstance;
@@ -11,8 +12,27 @@ let contractExport;
 
 const Wallet = () => {
 
-    const contractAddress ="0xa2E32929b22b63Bed6c500053039Ec3DE37798F0";
+    // Recuperar o endereço do contrato do armazenamento local ao iniciar
+    const initialContractAddress = localStorage.getItem('contractAddress') || "";
+    const [contractAddress, setContractAddress] = useState(initialContractAddress);
+
+    useEffect(() => {
+        // Atualizar o endereço do contrato quando o valor de contractHomePage for definido
+        if (contractHomePage) {
+            setContractAddress(contractHomePage.toString());
+            // Salvar o endereço do contrato no armazenamento local
+            localStorage.setItem('contractAddress', contractHomePage.toString());
+        }
+    }, [contractHomePage]);
+
+    console.log(contractAddress);
+
     contractExport = contractAddress;
+    console.log(simple_token_abi);
+
+
+  
+  
 
 
 
@@ -27,6 +47,8 @@ const Wallet = () => {
     const [signer, setSigner] = useState(null);
     const [contract,setContract]= useState(null);
 
+    const [amountP, setAmountP]= useState(null);
+
     const [quantTransfer, setQuantTransfer]= useState(null);
     const [cashbackBalance, setCashbackBalance] = useState(null);
 
@@ -37,7 +59,9 @@ const Wallet = () => {
 
 
     const connectWalletHandler = () => {
+        
         if(window.ethereum && window.ethereum.isMetaMask){
+
             
             window.ethereum.request({method: 'eth_requestAccounts'})
             .then(result =>{
@@ -90,7 +114,7 @@ const Wallet = () => {
                 // Certifique-se de que contractAddress e simple_token_abi estão definidos antes de criar o contrato
                 if (contractAddress && simple_token_abi) {
         
-                    const tempContract = new ethers.Contract(contractAddress, simple_token_abi, tempSigner);
+                    const tempContract = new ethers.Contract(contractAddress, simple_token_abi.abi, tempSigner);
                     // Define os estados com os novos valores
                     setProvider(tempProvider);
                     setSigner(tempSigner);
@@ -116,6 +140,7 @@ const Wallet = () => {
           updatequantTransfer();
           updateCashbackAcumulado();
           updateTotalSupply();
+          updateProduct();
         }
     }, [contract]);
     
@@ -125,6 +150,15 @@ const Wallet = () => {
           setBalance(Number(balanceBigN));
         } catch (error) {
           console.error('Erro ao atualizar o saldo:', error);
+        }
+    };
+
+    const updateProduct = async () => {
+        try {
+          const number = await contract.QuantProduto(defaultAccount);
+          setAmountP(Number(number));
+        } catch (error) {
+          console.error('Erro ao atualizar o Amountproduto:', error);
         }
     };
 
@@ -175,6 +209,7 @@ const Wallet = () => {
             <div style={{ textAlign: 'center' }}>
                 <h2>
                     {tokenName + " ERC-20 Wallet"}
+                    
 
                 </h2>
                 <button className={styles.button6} onClick={connectWalletHandler}>
@@ -191,6 +226,11 @@ const Wallet = () => {
                 <div>
                     <h3>
                         {tokenName} Balance da Conta: {balance}
+                    </h3>
+                </div>
+                <div>
+                    <h3>
+                         Amount Produto: {amountP}
                     </h3>
                 </div>
                 <div>
